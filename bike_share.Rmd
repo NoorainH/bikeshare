@@ -1,0 +1,490 @@
+---
+title: "Case Study: Bike-Share"
+output: html_notebook
+---
+
+### Project Description
+
+The objective of this project is to perform real-world tasks of a data analyst for a fictional company Cyclistic. In order to answer the key business questions, we will follow the steps of the data analysis process: ask, prepare, process, analyze, share, and act.
+
+### Scenario
+
+You are a data analyst working in the marketing analyst team at Cyclistic, a bike-share company in Chicago. The director of marketing believes the company’s future success depends on maximizing the number of annual memberships. Therefore, your team wants to understand how casual riders and annual members use Cyclistic bikes differently. From these insights, your team will design a new marketing strategy to convert casual riders into annual members. But first, Cyclistic executives must approve your recommendations, so they must be backed up with compelling data insights and professional data visualizations.
+
+### Ask
+
+#### Guiding questions
++ What is the problem you are trying to solve?
+ The primary goal is to devise a strategy that would persuade casual bike riders to upgrade to annual members.
++ How can your insights drive business decisions?
+The insights will help the market analyst team better understand how annual members and casual riders differ.
+
+#### Key Tasks
+##### 1. Identify the business task
+How do annual members and casual riders use Cyclistic bikes differently?
+
+##### 2. Consider Key Stakeholders
+Characters and teams  
+
++ Cyclistic: A bike-share program that features more than 5,800 bicycles and 600 docking stations. Cyclistic sets itself apart by also offering reclining bikes, hand tricycles, and cargo bikes, making bike-share more inclusive to people with disabilities and riders who can’t use a standard two-wheeled bike. The majority of riders opt for traditional bikes; about 8% of riders use the assistive options. Cyclistic users are more likely to ride for leisure, but about 30% use them to commute to work each day.  s
++ Lily Moreno: The director of marketing and your manager. Moreno is responsible for the development of campaigns and initiatives to promote the bike-share program. These may include email, social media, and other channels.
++ Cyclistic marketing analytics team: A team of data analysts who are responsible for collecting, analyzing, and reporting data that helps guide Cyclistic marketing strategy. You joined this team six months ago and have been busy learning about Cyclistic’s mission and business goals — as well as how you, as a junior data analyst, can help Cyclistic achieve them.
++ Cyclistic executive team: The notoriously detail-oriented executive team will decide whether to approve the recommended marketing program.
+
+#### Deliverable
+Design marketing strategies aimed at converting casual riders into annual members.  
+Find the key differences between casual rides and members, why casual riders would buy a membership, and how digital media could affect their marketing tactics
+
+
+### Prepare
+
+#### Guiding questions
++ Where is your data located?  
+This project uses the Cyclistic’s historical trip data to analyze and identify trends.  
+Data is extracted from this [kaggle dataset](https://divvy-tripdata.s3.amazonaws.com/index.html)
++ How is the data organized?  
+The data is organized by month across 10 csv files.
++ Are there issues with bias or credibility in this data? Does your data ROCCC?  
+There are no issues with bias or credibility in this data. The data is ROCCC: reliable, original, comprehensive, current and cited.
++ How are you addressing licensing, privacy, security, and accessibility?  
+The data is provided by Motivate International Inc with the following [licence](https://divvybikes.com/data-license-agreement)  
+The data is secure and accesibile: riders’ personally identifiable information isnt included in the data. 
++ How did you verify the data’s integrity?  
+There are 10 csv files. In each file there are 13 consistent attributes.
++ How does it help you answer your question?  
+The data provides some key insights about both the causal riders and the members.
+
+#### Key tasks
+1. Download data and store it appropriately.  
+All the files were downloaded
+2. Identify how it’s organized.  
+The data is organized by month across 10 csv files.
+3. Sort and filter the data.  
+I will be using R to sort and filter the data
+4. Determine the credibility of the data.  
+The data is provided by Motivate International Inc with the following [licence](https://divvybikes.com/data-license-agreement) and is credible
+
+### Process
+
+#### Key tasks
+1. Check the data for errors.
+2. Choose your tools.  
+3. Transform the data so you can work with it effectively.  
+4. Document the cleaning process.  
+
++ Used Google Sheets to load all the csv files to view and clean data.  
++ Added a column called “ride_length.” to calculate the length of each ride by subtracting the
+column “started_at” from the column “ended_at” and format it as duration(HH:MM:SS 373055).  
++ Added a column called “day_of_week,” to calculate the day of the week that each ride started using the “WEEKDAY”
+command and format it in characters(1 =Sunday and 7 = Saturday). 
++ Removed duplicates, and irrelevant data (example: rides that last more than a day)
+
+Optional: explore the dataset, you’ll find these columns: ride_id, rideable_type, started_at, ended_at, start_station_name, start_station_id, end_station_name, end_station_id, start_lat, start_lng, end_lat, end_lng, and member_casual.
+
+-----------
+```{r}
+# Install the tidyverse, ggplot and date packages
+install.packages("tidyverse")
+install.packages("ggplot2")
+install.packages("lubridate")
+
+# Load the packages
+library(tidyverse)
+library(lubridate)
+library(ggplot2)
+```
+
+```{r}
+# Importing the csv files
+trips_q1 <- read.csv("/data/Capstone_bike_data/Divvy_Trips_2020_Q1.csv")
+trips_04 <- read.csv("/data/Capstone_bike_data/202004-divvy-tripdata.csv")
+trips_05 <- read.csv("/data/Capstone_bike_data/202005-divvy-tripdata.csv")
+trips_06 <- read.csv("/data/Capstone_bike_data/202006-divvy-tripdata.csv")
+trips_07 <- read.csv("/data/Capstone_bike_data/202007-divvy-tripdata.csv")
+trips_08 <- read.csv("/data/Capstone_bike_data/202008-divvy-tripdata.csv")s
+trips_09 <- read.csv("/data/Capstone_bike_data/202009-divvy-tripdata.csv")
+trips_10 <- read.csv("/data/Capstone_bike_data/202010-divvy-tripdata.csv")
+trips_11 <- read.csv("/data/Capstone_bike_data/202011-divvy-tripdata.csv")
+trips_12 <- read.csv("/data/Capstone_bike_data/202012-divvy-tripdata.csv")
+```
+
+Check the data types, column names and structure of all datasets for consistency
+
+```{r}
+# check for consistency
+str(trips_q1)
+str(trips_04)
+str(trips_05)
+str(trips_06)
+str(trips_07)
+str(trips_08)
+str(trips_09)
+str(trips_10)
+str(trips_11)
+str(trips_12)
+```
+
+```{r}
+# change start & end station ids to integer data types
+trips_12$start_station_id <- as.integer(trips_12$start_station_id)
+trips_12$end_station_id <- as.integer(trips_12$end_station_id)
+
+# This gives a warning message: NAs introduced by coercion, to avoid include 
+options(warn=-1)
+```
+
+Merge all the datasets into one single dataframe
+
+```{r}
+# Merge
+trips_data <-bind_rows(trips_q1, trips_04, trips_05, trips_06, trips_07, trips_08, trips_09, trips_10, trips_11,  trips_12)
+```
+
+```{r}
+# Check structure and a few rows of newly formed data frame
+str(trips_data)
+head (trips_data)
+```
+
+```{r}
+# Checking for null values, grouped by columns 
+colSums(is.na(trips_data))
+```
+```{r}
+# Dropping records with null value
+trips_data %>% drop_na()
+```
+```{r}
+# remove duplicates
+trips_data_clean <- trips_data[!duplicated(trips_data$ride_id), ]
+print(paste("Omitted", nrow(trips_data) - nrow(trips_data_clean), "duplicates"))
+```
+```{r}
+#Remove test stations and stations with blank
+trips_data_clean <- (filter(trips_data_clean, !(start_station_name == "WATSON TESTING - DIVVY" | start_station_name == "HUBBARD ST BIKE CHECKING (LBS-WH-TEST)" | start_station_name =="hubbard_test_lws" | start_station_name =="")))
+```
+
+```{r}
+#Create another data frame of stations with station name, latitude and longitude to later analyze the most "in-demand" stations
+trips_lat_long <- trips_data_clean[,c(5,9,10)]
+```
+
+```{r}
+#Remove duplicates rows
+#trips_data_clean <- trips_data_clean[!duplicated(trips_data_clean$start_station_name),]
+```
+
+```{r}
+#Count total stations
+NROW(unique(trips_data_clean))
+```
+```{r}
+#Calculate the length of the trips and then convert it into minutes
+trips_data_clean$ride_length <- difftime(trips_data_clean$ended_at, trips_data_clean$started_at)
+trips_data_clean$ride_length <- trips_data_clean$ride_length/60
+trips_data_clean$ride_length <- round(trips_data_clean$ride_length, 2)
+
+# Change to numeric data type
+trips_data_clean$ride_length <- as.numeric(as.character(trips_data_clean$ride_length))
+```
+    
+```{r}
+# Create variables day, month, day,year, the date, and the day of the week for all rides
+trips_data_clean$date <- as.Date(trips_data_clean$started_at)
+trips_data_clean$month <- format(as.Date(trips_data_clean$date), "%B")
+trips_data_clean$day <- format(as.Date(trips_data_clean$date), "%d")
+trips_data_clean$year <- format(as.Date(trips_data_clean$date), "%Y")
+trips_data_clean$day_of_week <- weekdays(trips_data_clean$date)
+```
+
+```{r}
+#Remove rows where the ride length is in negative
+trips_data_clean <- filter(trips_data_clean, ride_length > 0)
+```
+
+```{r}
+# Calculate the min, max, mean and median grouped by members and casual riders
+summary(trips_data_clean$ride_length)
+```
+
+```{r}
+trips_data_clean %>% 
+  group_by(member_casual) %>% 
+  summarise(min_ride_length = min(ride_length), max_ride_length = max(ride_length),mean_ride_lenth = mean(ride_length),median_ride_length = median(ride_length))
+```
+  
+```{r}
+# Corrected the order of 'day_of_week' amd 'month' 
+trips_data_clean$day_of_week <- ordered(trips_data_clean$day_of_week, levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+
+trips_data_clean$month <- ordered(trips_data_clean$month, levels=c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"))
+```
+    
+```{r}
+# Check the number of rides, average ride duration for members vs casual riders based on day of the week
+trips_data_clean %>% 
+  group_by(member_casual, day_of_week) %>%  
+  summarise(number_of_rides = n(),average_ride_mins = mean(ride_length))%>% 
+  arrange(member_casual, day_of_week)
+```
+```{r}
+# Build a bar graph to demonstrate the rides vs the day of the week grouped by rider type
+trips_data_clean %>%  
+  group_by(member_casual, day_of_week) %>% 
+  summarise(number_of_rides = n()) %>% 
+  arrange(member_casual, day_of_week)  %>% 
+  ggplot(aes(x = day_of_week, y = number_of_rides, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  labs(title ="Trips by days of the week")+
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE))
+```
++ As per the graph, most rides are taken over the weekend by casual customers, whereas members take most of the rides during weekdays.
++ The average trip duration of a member is usually higher than that of a casual rider.
+    
+```{r}
+# Calculate the total casual rides on weekdays vs weekend
+trips_data_casual_weekday <- NROW(filter(trips_data_clean, member_casual == "casual" & !(day_of_week == "Saturday" | day_of_week == "Sunday")))
+print(paste("Total casual rides taken on weekday:", trips_data_casual_weekday))
+
+trips_data_casual_weekend <- NROW(filter(trips_data_clean, member_casual == "casual" & (day_of_week == "Saturday" | day_of_week == "Sunday")))
+print(paste("Total casual rides taken on weekend:", trips_data_casual_weekend))
+```
+
+```{r}
+# Calculate the total rides on weekdays vs weekend taken by members
+trips_data_member_weekday <- NROW(filter(trips_data_clean, member_casual == "member" & !(day_of_week == "Saturday" | day_of_week == "Sunday")))
+print(paste("Total rides taken by members on weekday:", trips_data_member_weekday))
+
+trips_data_member_weekend <- NROW(filter(trips_data_clean, member_casual == "member" & (day_of_week == "Saturday" | day_of_week == "Sunday")))
+print(paste("Total rides taken by members on weekend:", trips_data_member_weekend))
+```
+
+```{r}
+#Percentage of casual riders on weekdays vs weekend
+labs <- c("% of casual riders on Weekday", "% of casual riders on Weekend")
+slices_casual_week <- c(trips_data_casual_weekday, trips_data_casual_weekend)
+piepercent <- round(100 * slices_casual_week / sum(slices_casual_week), 1)
+lbls <- paste(labs, piepercent)
+lbls_casual_week <- paste(lbls, "%", sep="")
+lbls_casual_week
+```
+ 
+```{r}
+# Calculate total number of rides per month grouped by rider type
+trips_data_clean %>% 
+  group_by(member_casual, month) %>% 
+  summarise(number_of_rides = n(), average_duration = mean(ride_length)) %>% 
+  arrange(member_casual, month)	%>% 
+  ggplot(aes(x = month, y = number_of_rides, fill = member_casual)) +
+  geom_col(position = "dodge") + 
+  labs(title="Total number of rides per month") +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE))+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+The graph shows that the months of July, August and September is when there is the highest demand for bikes during the year among both members and casual riders. 
+    
+```{r}
+#Average number of trips by customer type and month
+trips_data_clean %>% 
+  group_by(member_casual, month) %>%  
+  summarise(number_of_rides = n(),`average_ride_mins` = mean(ride_length)) %>% 
+  arrange(member_casual,month) %>% print(n=30)
+# n=30, because by default the tibble was only showing 10 rows
+```
+
+```{r}
+# ride type vs members or casual riders
+trips_data_clean %>%
+  group_by(rideable_type,member_casual) %>%
+  summarise(number_of_rides = n()) %>%  
+  ggplot(aes(x= rideable_type, y=number_of_rides, fill= member_casual))+
+  geom_bar(stat='identity') +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  labs(title ="Ride type Vs. Number of trips")
+```
++ Classic bikes are mainly used by members.
++ Docked bikes has the highest demand by both members and casual riders.
++ Electric bikes also see a higher demand by members than casual riders.
+
+```{r}
+#Calculate the total casual rides by month - July to September vs rest of the year
+total_rides_casual_jul_sept <- NROW(filter(trips_data_clean, member_casual == "casual" & (month == "July" | month == "August" | month == "September")))
+print(paste("Total rides taken by casual riders from July to September:", total_rides_casual_jul_sept))
+
+total_rides_casual_oct_jun <- NROW(filter(trips_data_clean, member_casual == "casual" & !(month == "July" | month == "August" | month == "September")))
+print(paste("Total rides taken by casual riders for rest of the year:", total_rides_casual_oct_jun))
+```
+
+```{r}
+#Percentage of casual riders by month - July to September vs rest of the year
+labs <- c("% of casual riders from July To September", "% of casual riders for rest of the year")
+slices_casual_month <- c(total_rides_casual_jul_sept, total_rides_casual_oct_jun)
+piepercent <- round(100 * slices_casual_month / sum(slices_casual_month), 1)
+lbls <- paste(labs, piepercent)
+lbls_casual_month <- paste(lbls, "%", sep="")
+lbls_casual_month
+```
+ 
+```{r}
+#Calculate the total member rides by month - July to September compared to rest of the year
+total_rides_member_jul_sept <- NROW(filter(trips_data_clean, member_casual == "member" & (month == "July" | month == "August" | month == "September")))
+print(paste("Total rides taken by members from July to September:", total_rides_member_jul_sept))
+
+total_rides_member_oct_jun <- NROW(filter(trips_data_clean, member_casual == "member" & !(month == "July" | month == "August" | month == "September")))
+print(paste("Total rides taken by members for rest of the year:", total_rides_member_oct_jun)) 
+```
+   
+```{r}
+#Percentage of member rides by month - July to September compared to rest of the year
+labs <- c("% of member rides from July To September", "% of member rides for rest of the year")
+slices_member_month <- c(total_rides_member_jul_sept, total_rides_member_oct_jun)
+piepercent <- round(100 * slices_member_month / sum(slices_member_month), 1)
+lbls <- paste(labs, piepercent)
+lbls_member_month <- paste(lbls, "%", sep="")
+lbls_member_month
+```
+
+```{r}
+# Create a new data frame for members
+trips_member <-  filter(trips_data_clean, member_casual == "member")
+
+#Calculate total number of member rides grouped by month
+trips_member %>% 
+  group_by(rideable_type, month) %>% 
+  summarise(number_of_rides = n(), average_ride_mins = mean(ride_length)) %>% 		
+  arrange(rideable_type, month)	%>% 
+  ggplot(aes(x = month, y = number_of_rides, fill = rideable_type)) +
+  geom_col(position = "dodge") + 
+  labs(title="Total Number of Member Rides by Month") + 
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE))+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+
+```{r}
+# Calculate total number of member rides grouped by day
+trips_member %>% 
+  group_by(rideable_type, day_of_week) %>% 
+  summarise(number_of_rides = n(), average_ride_mins = mean(ride_length)) %>% 
+  arrange(rideable_type, day_of_week)%>% 
+  ggplot(aes(x = day_of_week, y = number_of_rides, fill = rideable_type)) +
+  geom_col(position = "dodge") + 
+  labs(title="Total Number of Member Rides by Day") + 
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE))+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+
+```{r}
+#Create a new data frame for casual riders
+trips_casual <-  filter(trips_data_clean, member_casual == "casual")
+
+#Calculate total number of casual rides grouped by month
+trips_casual %>% 
+  group_by(rideable_type, month) %>% 
+  summarise(number_of_rides = n(), average_ride_mins = mean(ride_length)) %>% 
+  arrange(rideable_type, month)	%>% 
+  ggplot(aes(x = month, y = number_of_rides, fill = rideable_type)) +
+  geom_col(position = "dodge") + 
+  labs(title="Total Number of casual Rides by Month") + 
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE))+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) 
+```
+
+```{r}
+# Calculate total number of casual rides grouped by day
+trips_casual %>% 
+  group_by(rideable_type, day_of_week) %>% 
+  summarise(number_of_rides = n(), average_ride_mins = mean(ride_length)) %>% 
+  arrange(rideable_type, day_of_week)%>% 
+  ggplot(aes(x = day_of_week, y = number_of_rides, fill = rideable_type)) +
+  geom_col(position = "dodge") + 
+  labs(title="Total Number of Casual Rides by Day") + 
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE))+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))  
+```
+
+```{r}
+#In the casual riders data frame, created a new column for route
+trips_casual <- trips_casual %>%
+  mutate(route = paste(start_station_name, "To", sep=" "))
+
+trips_casual <- trips_casual %>%       
+  mutate(route = paste(route, end_station_name, sep =" "))
+
+#The most popular route taken by casual riders
+popular_route <- trips_casual %>% 
+  group_by(route) %>%
+  summarise(number_of_rides  = n(), average_ride_mins = mean(ride_length)) %>% 
+  arrange(route, number_of_rides, average_ride_mins)
+
+#Filter the data frame to show just the top 10 routes 
+popular_route10 <- head(arrange(popular_route, desc(number_of_rides)),10)
+head(popular_route10, 10)
+```
+    
+```{r}
+#Create new data frame for members
+trips_member <- filter(trips_data_clean, member_casual == "member")
+
+#In the member riders data frame, created a new column for route
+trips_member <- trips_member %>%
+  mutate(route = paste(start_station_name, "To", sep=" "))
+
+trips_member <- trips_member %>%       
+  mutate(route = paste(route, end_station_name, sep =" "))
+
+#The most popular route taken by members
+popular_route_member <- trips_member %>% 
+  group_by(route) %>%
+  summarise(number_of_rides  = n(), average_ride_mins = mean(ride_length)) %>% 
+  arrange(route, number_of_rides, average_ride_mins)
+
+#Filter the data frame to show just the top 10 routes 
+popular_route10_member <- head(arrange(popular_route_member, desc(number_of_rides)),10)
+head(popular_route10_member, 10)
+```
+
+### Share:
+
++ The average ride duration of members is 15.7 minutes and that of casual rider is 47.4 minutes which is approximately 3 times higher compared to that of members.
+
++ For members the average ride time is consistent on weekdays for an average of 14.8 minutes and sees a slight increase to 18.1 minutes on the weekend.
+
++ For casual riders the week starts off to an average of 42 minutes from Monday till Wednesday and a slight increase to 46 minutes towards the end of the week(Thursday/Friday) and a jump to 54 minutes on the weekend.
+
+```{r}
+install.packages("plotrix")
+library(plotrix)
+
+# casual rides by days
+pie3D(slices_casual_week, labels = lbls_casual_week, explode = 0.1, col= terrain.colors(2), main = "% of Casual Riders: Weekdays Vs Weekends")
+```
+
+
+```{r}
+# casual rides by month
+pie3D(slices_casual_month, labels = lbls_casual_month, explode = 0.1, col= terrain.colors(2), main = "% of Casual Riders: Summer(Jul-Sept) Vs Rest of the year")
+```
+
+```{r}
+# member rides by month
+pie3D(slices_member_month, labels = lbls_member_month, explode = 0.1, col= terrain.colors(2), main = "% of Members: Summer(Jul-Sept) Vs Rest of the year")
+```
+
+## Act:
+
+Recommendations for increasing the number of rider membership are:
+
+The highest demands for bikes is seen in the summer months from July to September for both casual riders and members. Almost 60% of the casual rides are during this time, which could be due to tourists and other events.
+
+During these months we could:  
+
++ Increase the availability of bikes.  
++ Weekly, monthly subscription offers.
+
+### Resources
+
++ [CRAN](https://cran.r-project.org)  
++ [Docker Docs](https://docs.docker.com/engine/reference/commandline/run/)  
++ [The Rocker Project](https://rocker-project.org)
++ [Stack Overflow](https://stackoverflow.com)  
++ [ggplot2](https://ggplot2.tidyverse.org/reference/scale_continuous.html)
